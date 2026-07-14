@@ -29,24 +29,18 @@ class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = ('id', 'name', 'description', 'category', 'category_id', 
-                  'total_quantity', 'image', 'is_active', 'location', 
-                  'specifications', 'is_unique', 'created_at')
+                    'total_quantity', 'image', 'is_active', 'location', 
+                    'specifications', 'is_unique', 'created_at')
         read_only_fields = ('id', 'created_at', 'is_unique')
 
-
 class BookingListSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для списка бронирований (сокращённый)
-    """
     user = UserSerializer(read_only=True)
-    resource_name = serializers.CharField(source='resource.name', read_only=True)
-    resource_id = serializers.IntegerField(source='resource.id', read_only=True)
+    resource = ResourceSerializer(read_only=True)
     
     class Meta:
         model = Booking
-        fields = ('id', 'user', 'resource_id', 'resource_name', 'date', 
+        fields = ('id', 'user', 'resource', 'date',
                     'start_time', 'end_time', 'quantity', 'status', 'comment', 'created_at')
-
 
 class BookingCreateSerializer(serializers.ModelSerializer):
     """
@@ -66,11 +60,9 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         end_time = attrs['end_time']
         quantity = attrs.get('quantity', 1)
         
-        # Проверяем, что время начала раньше окончания
         if start_time >= end_time:
             raise serializers.ValidationError("Время начала должно быть раньше времени окончания")
         
-        # Проверяем доступность
         is_available, message, available = check_resource_availability(
             resource.id, date, start_time, end_time, quantity
         )
@@ -96,7 +88,7 @@ class BookingDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ('id', 'user', 'resource', 'date', 'start_time', 'end_time', 
-                  'quantity', 'status', 'comment', 'admin_comment', 'created_at', 'updated_at')
+                    'quantity', 'status', 'comment', 'admin_comment', 'created_at', 'updated_at')
 
 
 class BookingUpdateStatusSerializer(serializers.ModelSerializer):

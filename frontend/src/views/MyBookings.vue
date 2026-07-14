@@ -12,10 +12,8 @@
         <option value="cancelled">Отменено</option>
       </select>
     </div>
-
-    <div v-if="loading" class="loading">Загрузка...</div>
     
-    <div v-else-if="bookings.length === 0" class="empty">
+    <div v-if="bookings.length === 0" class="empty">
       <p>У вас пока нет бронирований</p>
       <router-link to="/resources" class="btn-primary">Перейти к каталогу</router-link>
     </div>
@@ -89,11 +87,12 @@ const loadBookings = async () => {
   try {
     const params: any = {};
     if (statusFilter.value) params.status = statusFilter.value;
-    bookings.value = await bookingService.getAll(params);
+    const data = await bookingService.getAll(params);
+    console.log('📥 Получены бронирования:', data);
+    bookings.value = data;
   } catch (error) {
     console.error('Ошибка загрузки бронирований:', error);
-  } finally {
-    loading.value = false;
+    bookings.value = [];
   }
 };
 

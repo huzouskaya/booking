@@ -47,9 +47,10 @@ export const resourceService = {
 
 // Бронирования
 export const bookingService = {
-    async getAll(params?: { status?: string; date?: string; resource?: number }): Promise<Booking[]> {
-        const response = await api.get<Booking[]>('bookings/', { params });
-        return response.data;
+    async getAll(params?: any): Promise<Booking[]> {
+        const response = await api.get('bookings/', { params });
+        console.log('📥 bookingService.getAll ответ:', response.data);
+        return response.data.results || response.data;
     },
 
     async getById(id: number): Promise<Booking> {
