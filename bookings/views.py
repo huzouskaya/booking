@@ -8,7 +8,7 @@ from .serializers import (
     BookingListSerializer, BookingCreateSerializer, 
     BookingDetailSerializer, BookingUpdateStatusSerializer
 )
-from core.permissions import IsAdmin, IsTeacher, IsUser
+from core.permissions import IsAdmin, IsUser
 from core.utils import check_resource_availability
 
 
@@ -85,6 +85,7 @@ class BookingListCreateView(generics.ListCreateAPIView):
     """
     Список бронирований и создание нового
     """
+    serializer_class = BookingListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['status', 'date', 'resource']
     
@@ -100,6 +101,10 @@ class BookingListCreateView(generics.ListCreateAPIView):
     
     def get_queryset(self):
         user = self.request.user
+        
+        # Для Swagger генерации - возвращаем пустой queryset
+        if getattr(self, 'swagger_fake_view', False):
+            return Booking.objects.none()
         
         # Админ видит все бронирования
         if user.is_staff:
@@ -130,6 +135,10 @@ class BookingDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         
+        # Для Swagger генерации - возвращаем пустой queryset
+        if getattr(self, 'swagger_fake_view', False):
+            return Booking.objects.none()
+        
         if user.is_staff:
             return Booking.objects.all().select_related('user', 'resource')
         
@@ -142,6 +151,7 @@ class BookingCancelView(generics.GenericAPIView):
     """
     permission_classes = [IsUser]
     serializer_class = BookingDetailSerializer
+    queryset = Booking.objects.all()  # Добавлен queryset
     
     def post(self, request, pk):
         booking = get_object_or_404(Booking, pk=pk, user=request.user)
@@ -166,6 +176,7 @@ class BookingCheckAvailabilityView(generics.GenericAPIView):
     Проверка доступности ресурса на определённое время
     """
     permission_classes = [permissions.AllowAny]
+    serializer_class = None  # Добавлен serializer_class
     
     def get(self, request):
         resource_id = request.query_params.get('resource_id')

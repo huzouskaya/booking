@@ -45,7 +45,7 @@ class BookingListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ('id', 'user', 'resource_id', 'resource_name', 'date', 
-                  'start_time', 'end_time', 'quantity', 'status', 'comment', 'created_at')
+                    'start_time', 'end_time', 'quantity', 'status', 'comment', 'created_at')
 
 
 class BookingCreateSerializer(serializers.ModelSerializer):
